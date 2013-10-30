@@ -1,0 +1,150 @@
+<kibana-panel ng-controller='HPGraph' ng-init='init()'>
+<!--
+  <span ng-show="panel.spyable" style="position:absolute;right:0px;top:0px" class='panelextra pointer'>
+      <i bs-modal="'partials/modal.html'" class="icon-eye-open"></i>
+  </span>
+  <div style="{{panel.overflow}}:{{panel.height || row.height}};overflow-y:auto;overflow-x:auto">
+    <div class="row-fluid" ng-show="panel.paging">
+      <div class="span1 offset1" style="text-align:right">
+        <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='icon-circle-arrow-left pointer'></i>
+        <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='icon-arrow-left pointer'></i>
+      </div>
+      <div class="span8" style="text-align:center">
+        <strong>{{panel.offset}}</strong> to <strong>{{panel.offset + data.slice(panel.offset,panel.offset+panel.size).length}}</strong>
+        <small> of {{data.length}} available for paging</small>
+      </div>
+      <div class="span1" style="text-align:left">
+        <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='icon-arrow-right pointer'></i>
+      </div>
+    </div>
+    <div class="small" ng-show="panel.fields.length == 0">No columns configured. You may want to add a <strong>fields panel</strong>, or click the edit button in the top right of this panel to add some columns</div>
+   
+    <table class="table-hover table table-condensed" ng-style="panel.style">
+      <thead ng-show="panel.header">
+        
+        <th style="white-space:nowrap" ng-repeat="field in panel.fields">
+          <i ng-show="!$first" class="pointer link icon-caret-left" ng-click="_.move(panel.fields,$index,$index-1)"></i>
+
+          <span  class="pointer" ng-click="set_sort(field)" ng-show='panel.sortable'>
+            {{field}} 
+            <i ng-show='field == panel.sort[0]' class="pointer link" ng-class="{'icon-chevron-up': panel.sort[1] == 'asc','icon-chevron-down': panel.sort[1] == 'desc'}"></i>
+          </span> 
+          <span ng-show='!panel.sortable'>{{field}}</span> 
+          <i ng-show="!$last" class="pointer link icon-caret-right" ng-click="_.move(panel.fields,$index,$index+1)"></i>
+        </th>      
+      </thead>
+      <tbody ng-repeat="row in data.slice(panel.offset,panel.offset+panel.size)" ng-class-odd="'odd'">
+        <tr ng-click="toggle_details(row)" class="pointer">
+          <td ng-repeat="field in panel.fields" ng-bind-html-unsafe="(row.highlight[field]||row._source[field]) | highlight"></td>
+        </tr>
+        <tr ng-show="row.kibana.details">
+          <td colspan=1000>
+            <table class='table table-bordered table-condensed'>
+              <thead>
+                <th>Field</th>
+                <th>Action</th>
+                <th>Value</th>
+              </thead>
+              <tr ng-repeat="(key,value) in row.kibana.details._source" ng-class-odd="'odd'">
+                <td>{{key}}</td>
+                <td>
+                  <i class='icon-search pointer' ng-click="build_search(key,value)"></i> 
+                  <i class='icon-ban-circle pointer' ng-click="build_search(key,value,true)"></i>
+                </td>
+                <td>{{value}}</td>
+              </tr> 
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    
+    <div class="row-fluid" ng-show="panel.paging">
+      <div class="span1 offset3" style="text-align:right">
+        <i ng-click="panel.offset = 0" ng-show="panel.offset > 0" class='icon-circle-arrow-left pointer'></i>
+        <i ng-click="panel.offset = (panel.offset - panel.size)" ng-show="panel.offset > 0" class='icon-arrow-left pointer'></i>
+      </div>
+      <div class="span4" style="text-align:center">
+        <strong>{{panel.offset}}</strong> to <strong>{{panel.offset + data.slice(panel.offset,panel.offset+panel.size).length}}</strong>
+        <small> of {{data.length}} available for paging</small>
+      </div>
+      <div class="span1" style="text-align:left">
+        <i ng-click="panel.offset = (panel.offset + panel.size)" ng-show="data.length > panel.offset+panel.size" class='icon-arrow-right pointer'></i>
+      </div>
+    </div>
+  </div>
+<br>
+-->
+<div class="menu">
+<ul>
+<li><a href="#" onmouseover="easytabs('1', '1');" onfocus="easytabs('1', '1');" onclick="return false;"  title="" id="tablink1">Original</a></li>
+<li><a href="#" onmouseover="easytabs('1', '2');" onfocus="easytabs('1', '2');" onclick="return false;"  title="" id="tablink2">Conneted Subgraph </a></li>
+<li><a href="#" onmouseover="easytabs('1', '3');" onfocus="easytabs('1', '3');" onclick="return false;"  title="" id="tablink3">Motif Reduced </a></li>
+<li><a href="#" onmouseover="easytabs('1', '4');" onfocus="easytabs('1', '4');" onclick="return false;"  title="" id="tablink4">Intention Graph </a></li>
+<li><a href="#" onmouseover="easytabs('1', '5');call_map()" onfocus="easytabs('1', '5');" onclick="return false;"  title="" id="tablink5">Wrold Map</a></li>
+</ul>
+</div>
+<div id="HPGraphs1" class ="HPGraphs1">
+<div id="text11" class ="text11" /> 
+<div id="text12" class ="text12" style="display:none">Hostname node is colored in <b><font color="#19FF1C">green</font></b>, url nodes in <b><font color="#FFB6C1">pink</font></b> and downloaded md5 nodes in <b><font color="#0000FF">blue</font></b>. </div>
+<div id="Stage1" class ="Stage1" style="display:none"/>
+</div>
+<div id="HPGraphs2" class ="HPGraphs2"  style="display:none">
+<select name="Options3" onchange="connect_graph(this.value)">
+<option value=0>Subgraph0</option>
+<option value=1>Subgraph1</option>
+<option value=2>Subgraph2</option>
+<option value=0>Subgraph3</option>
+<option value=1>Subgraph4</option>
+<option value=2>Subgraph5</option>
+</select>
+<div id="Stage2" class ="Stage2" />
+</div>
+<div id="HPGraphs3" class ="HPGraphs3"  style="display:none">
+<div id="text31" class ="text31" >
+<p><font size="4" color="red">Malicious reduce graph</font></p>
+Malicious reduced graph is aimed to simply the original graph by deleting inessential paths which doesn't include exploit url nodes or downloaded files nodes (md5 nodes).</div>
+<div id="Stage31" class ="Stage31" />
+<div id="text32" class ="text32" >
+<p><font size="4" color="red">Motif reduce graph</font></p>
+Motif reduce graph  depend on below rules<br><br>
+</div>
+<div id="picture32" class ="picture32" >
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/M1_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/M2_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/M3_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/M4_reduce.png" width="200" height="100"></img>
+</div>
+
+<div id="Stage32" class ="Stage32" />
+</div>
+<div id="HPGraphs4" class ="HPGraphs4"  style="display:none">
+<div id="text41" class ="text41" >
+<p><font size="4" color="red">Intention graph</font></p>
+Intention graph  depend on below rules<br><br>
+</div>
+<div id="picture41" class ="picture41" >
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/I1_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/I2_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/I3_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/I4_reduce.png" width="200" height="100"></img>
+<img src="http://140.116.163.148/kibana/panels/HPGraph/picture/I5_reduce.png" width="200" height="100"></img>
+</div>
+<div id="text42" class ="text42" ></div>
+<div id="Stage4" class ="Stage4" />
+</div>
+</div>
+<div id="HPGraphs5" class ="HPGraphs5"  style="display:none; height:670px;" >
+<div id="listdiv" style="width:350px; overflow:auto; height:470px; float:right;" ></div>
+<div id="mapdiv" style="height: 470px;" ></div>
+</div>
+<div id="right_menu" class="right_menu"   display:none >
+<div class="menuitems" >
+<img src='http://ppt.cc/RW--'  height="32" width="32" onclick='right_menu.style.visibility="hidden"'> </img>
+</div>
+<div class="menu_graph" id="menu_graph" >start</div>
+</div>
+
+</kibana-panel>
+
+

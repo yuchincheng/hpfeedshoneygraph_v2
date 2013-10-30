@@ -1,0 +1,8 @@
+body {font-family:Arial, Helvetica, sans-serif; font-size:11px;}
+/*Example for a Menu Style*/
+.menu {background-color:#008bd3;border-bottom:1px solid #d7d7d7; height:23px;width:500px;}
+.menu ul {margin:0px; padding:0px; list-style:none; text-align:center;}
+.menu li {display:inline; line-height:23px;}
+.menu li a {color:#ffffff; text-decoration:none; padding:5px 5px 6px 5px; }
+.menu li a.tabactive {border-left:1px solid #d7d7d7; border-right:1px solid #d7d7d7; color:#000000; background-color:#ffffff; font-weight:bold;  position:relative;}
+#tabcontent1,#tabcontent2,#tabcontent3,#tabcontent4,#anothercontent1,#anothercontent2, #anothercontent3, #anothercontent4,#anothercontent5, #anothercontent6 {border:1px solid #ececec; width:298px; text-align:center;padding:6px 0px; font-size:12px; margin-bottom:5px;}
